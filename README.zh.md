@@ -1,6 +1,13 @@
+[![GitHub Workflow Status (branch)](https://img.shields.io/github/actions/workflow/status/orzkratos/supervisorkratos/release.yml?branch=main&label=BUILD)](https://github.com/orzkratos/supervisorkratos/actions/workflows/release.yml?query=branch%3Amain)
+[![GoDoc](https://pkg.go.dev/badge/github.com/orzkratos/supervisorkratos)](https://pkg.go.dev/github.com/orzkratos/supervisorkratos)
+[![Coverage Status](https://img.shields.io/coveralls/github/orzkratos/supervisorkratos/main.svg)](https://coveralls.io/github/orzkratos/supervisorkratos?branch=main)
+[![Supported Go Versions](https://img.shields.io/badge/Go-1.25+-lightgrey.svg)](https://go.dev/)
+[![GitHub Release](https://img.shields.io/github/release/orzkratos/supervisorkratos.svg)](https://github.com/orzkratos/supervisorkratos/releases)
+[![Go Report Card](https://goreportcard.com/badge/github.com/orzkratos/supervisorkratos)](https://goreportcard.com/report/github.com/orzkratos/supervisorkratos)
+
 # supervisorkratos
 
-用于为 Kratos 微服务生成 supervisor 配置文件的 Go 包。
+用于为 Kratos 微服务生成 supervisord 配置文件的 Go 包。
 
 ---
 
@@ -103,10 +110,10 @@ program := supervisorkratos.NewProgramConfig(
 ## 配置选项
 
 ### 进程控制
-- `WithAutoStart(bool)` - supervisor 启动时自动启动
-- `WithAutoRestart(bool)` - 失败时自动重启  
+- `WithAutoStart(bool)` - supervisord 启动时自动启动
+- `WithAutoRestart(bool)` - 崩溃时自动重启
 - `WithAutoRestartMode(string)` - 自动重启模式 ("false"/"true"/"unexpected")
-- `WithStartRetries(int)` - 最大启动重试次数
+- `WithStartRetries(int)` - 最大启动尝试次数
 - `WithStartSecs(int)` - 启动成功前等待秒数
 
 ### 日志设置
@@ -132,19 +139,19 @@ program := supervisorkratos.NewProgramConfig(
 
 ```bash
 # 1. 生成配置文件
-go run main.go > /etc/supervisor/conf.d/myapp.conf
+go run main.go > /etc/supervisord/conf.d/myapp.conf
 
-# 2. 更新 supervisor
+# 2. 重新加载 supervisord
 sudo supervisorctl reread
 sudo supervisorctl update
 
-# 3. 控制服务
+# 3. 管理服务
 sudo supervisorctl start myapp
 sudo supervisorctl status
 ```
 
 <!-- TEMPLATE (ZH) BEGIN: STANDARD PROJECT FOOTER -->
-<!-- VERSION 2025-09-06 04:53:24.895249 +0000 UTC -->
+<!-- VERSION 2025-09-26 07:39:27.188023 +0000 UTC -->
 
 ## 📄 许可证类型
 
@@ -164,7 +171,7 @@ MIT 许可证。详见 [LICENSE](LICENSE)。
 - 🔧 **配置困扰？** 询问复杂设置的相关问题
 - 📢 **关注进展？** 关注仓库以获取新版本和功能
 - 🌟 **成功案例？** 分享这个包如何改善工作流程
-- 💬 **意见反馈？** 欢迎所有建议和宝贵意见
+- 💬 **反馈意见？** 欢迎提出建议和意见
 
 ---
 
@@ -182,7 +189,7 @@ MIT 许可证。详见 [LICENSE](LICENSE)。
 8. **暂存**：暂存更改（`git add .`）
 9. **提交**：提交更改（`git commit -m "Add feature xxx"`）确保向后兼容的代码
 10. **推送**：推送到分支（`git push origin feature/xxx`）
-11. **PR**：在 GitHub 上打开 Pull Request（在 GitHub 网页上）并提供详细描述
+11. **PR**：在 GitHub 上打开 Merge Request（在 GitHub 网页上）并提供详细描述
 
 请确保测试通过并包含相关的文档更新。
 
@@ -190,7 +197,7 @@ MIT 许可证。详见 [LICENSE](LICENSE)。
 
 ## 🌟 项目支持
 
-非常欢迎通过提交 Pull Request 和报告问题来为此项目做出贡献。
+非常欢迎通过提交 Merge Request 和报告问题来为此项目做出贡献。
 
 **项目支持：**
 
@@ -199,7 +206,7 @@ MIT 许可证。详见 [LICENSE](LICENSE)。
 - 📝 **撰写博客**关于开发工具和工作流程 - 我们提供写作支持
 - 🌟 **加入生态** - 致力于支持开源和（golang）开发场景
 
-**使用这个包快乐编程！** 🎉
+**祝你用这个包编程愉快！** 🎉🎉🎉
 
 <!-- TEMPLATE (ZH) END: STANDARD PROJECT FOOTER -->
 

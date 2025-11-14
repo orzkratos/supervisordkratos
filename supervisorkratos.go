@@ -23,8 +23,8 @@ type ProgramConfig struct {
 	// Environment variables // 环境变量
 	Environment *Opt[map[string]string] // Environment variables // 环境变量
 
-	// Process control settings // 进程控制设置
-	AutoStart    *Opt[bool] // Auto start on supervisor startup // supervisor 启动时自动启动
+	// Process settings // 进程设置
+	AutoStart    *Opt[bool] // Auto start on supervisord startup // supervisord 启动时自动启动
 	AutoRestart  *Opt[any]  // Auto restart on failure (boolean or string: "false"/"true"/"unexpected") // 失败时自动重启（布尔值或字符串）
 	StartRetries *Opt[int]  // Max start retry times // 最大启动重试次数
 	StartSecs    *Opt[int]  // Seconds to wait before considering start successful // 启动成功前等待秒数
@@ -34,7 +34,7 @@ type ProgramConfig struct {
 	LogBackups     *Opt[int]    // Log backup files count // 日志备份文件数量
 	RedirectStderr *Opt[bool]   // Redirect stderr to stdout // 重定向 stderr 到 stdout
 
-	// Advanced process control // 高级进程控制
+	// Advanced process settings // 高级进程设置
 	StopAsGroup  *Opt[bool]   // Stop all processes as group // 作为组停止所有进程
 	StopWaitSecs *Opt[int]    // Graceful stop timeout seconds // 优雅停止超时秒数
 	KillAsGroup  *Opt[bool]   // Kill child processes as group // 强制杀死子进程组
@@ -45,13 +45,6 @@ type ProgramConfig struct {
 	// Multi-instance settings // 多实例设置
 	NumProcs    *Opt[int]    // Number of process instances // 进程实例数量
 	ProcessName *Opt[string] // Process name template // 进程名称模板
-}
-
-// GroupConfig supervisor group configuration
-// supervisor 组配置
-type GroupConfig struct {
-	Name     string           // Group name // 组名称
-	Programs []*ProgramConfig // Program configs // 程序配置列表
 }
 
 // NewProgramConfig create new ProgramConfig with required fields
@@ -70,12 +63,12 @@ func NewProgramConfig(name string, root string, userName string, slogRoot string
 		// Environment variables // 环境变量
 		Environment: NewOpt(make(map[string]string)),
 
-		// Set supervisor official default values
-		// 设置 supervisor 官方默认值
+		// Set supervisord standard default values
+		// 设置 supervisord 标准默认值
 
-		// Process control settings // 进程控制设置
+		// Process settings // 进程设置
 		AutoStart:    NewOpt(true),
-		AutoRestart:  NewOpt[any]("unexpected"), // supervisor official default
+		AutoRestart:  NewOpt[any]("unexpected"), // supervisord standard default
 		StartRetries: NewOpt(3),
 		StartSecs:    NewOpt(1),
 
@@ -84,8 +77,8 @@ func NewProgramConfig(name string, root string, userName string, slogRoot string
 		LogBackups:     NewOpt(10),
 		RedirectStderr: NewOpt(false),
 
-		// Advanced process control defaults
-		// 高级进程控制默认值
+		// Advanced process settings defaults
+		// 高级进程设置默认值
 		StopAsGroup:  NewOpt(false),
 		StopWaitSecs: NewOpt(10),
 		KillAsGroup:  NewOpt(false),
@@ -98,22 +91,6 @@ func NewProgramConfig(name string, root string, userName string, slogRoot string
 		NumProcs:    NewOpt(1),
 		ProcessName: NewOpt("%(program_name)s"),
 	}
-}
-
-// NewGroupConfig create new GroupConfig
-// 创建新的 GroupConfig
-func NewGroupConfig(name string) *GroupConfig {
-	return &GroupConfig{
-		Name:     must.Nice(name),
-		Programs: make([]*ProgramConfig, 0),
-	}
-}
-
-// AddProgram add program to group
-// 添加程序到组
-func (g *GroupConfig) AddProgram(program *ProgramConfig) *GroupConfig {
-	g.Programs = append(g.Programs, program)
-	return g
 }
 
 // ProgramConfig chain methods for configuration customization
@@ -241,38 +218,15 @@ func (p *ProgramConfig) WithProcessName(processName string) *ProgramConfig {
 	return p
 }
 
-// GenerateGroupConfig generate supervisor group configuration
-// 生成 supervisor 组配置
-func GenerateGroupConfig(group *GroupConfig) string {
-	must.Full(group)
-	must.Nice(group.Name)
-	must.Have(group.Programs)
-
-	ptx := printgo.NewPTX()
-
-	// Generate group header
-	// 生成组头部
-	ptx.Println(`[group:` + group.Name + `]`)
-	programs := make([]string, 0, len(group.Programs))
-	for _, p := range group.Programs {
-		programs = append(programs, p.Name)
-	}
-	ptx.Println(`programs=` + strings.Join(programs, ","))
-	ptx.Println()
-
-	// Generate each program config
-	// 生成每个程序配置
-	for _, program := range group.Programs {
-		ptx.Println()
-		cfs := GenerateProgramConfig(program)
-		ptx.Println(strings.TrimSpace(cfs))
-	}
-
-	return ptx.String()
-}
-
 // GenerateProgramConfig generate single program configuration from ProgramConfig
-// 从 ProgramConfig 生成单个程序配置
+// Creates supervisord INI format config with explicit values (no spacing inside)
+// Includes basic info, process settings, log paths, and advanced settings
+// Omits default values to keep config concise and focused on what matters
+//
+// GenerateProgramConfig 从 ProgramConfig 生成单个程序配置
+// 创建 supervisord INI 格式配置，包含显式值（内部无空行）
+// 包括基础信息、进程控制、日志路径和高级设置
+// 省略默认值以保持配置简洁，专注于用户设置
 func GenerateProgramConfig(program *ProgramConfig) string {
 	must.Full(program)
 	must.Nice(program.Name)
@@ -282,21 +236,21 @@ func GenerateProgramConfig(program *ProgramConfig) string {
 
 	ptx := printgo.NewPTX()
 
+	// Generate program header and basic required settings
+	// 生成程序头部和基本必需设置
 	ptx.Println("[program:" + program.Name + "]")
 	ptx.Println("user            = " + program.UserName)
 	ptx.Println("directory       = " + program.Root)
 	ptx.Println("command         = " + filepath.Join(program.Root, "bin", program.Name))
-
+	// Add environment variables if set
+	// 添加环境变量（如果已设置）
 	if program.Environment.IsSet() {
 		if env := combineSsMap(program.Environment.Get(), ","); env != "" {
 			ptx.Println("environment     = " + env)
 		}
 	}
-	ptx.Println()
-	mark := ptx.Len()
-
-	// Only print explicitly set values (user configured)
-	// 只打印显式设置的值（用户配置的）
+	// Process settings - just print explicit values
+	// 进程设置 - 只打印显式设置的值
 	if program.AutoStart.IsSet() {
 		ptx.Println("autostart       = " + strconv.FormatBool(program.AutoStart.Get()))
 	}
@@ -317,12 +271,6 @@ func GenerateProgramConfig(program *ProgramConfig) string {
 	if program.StartSecs.IsSet() {
 		ptx.Println("startsecs       = " + strconv.Itoa(program.StartSecs.Get()))
 	}
-
-	if ptx.Len() > mark {
-		ptx.Println()
-	}
-	mark = ptx.Len()
-
 	// Log settings always show (required for paths)
 	// 日志设置始终显示（路径必需）
 	ptx.Println("stdout_logfile  = " + filepath.Join(program.SlogRoot, program.Name+".log"))
@@ -332,12 +280,6 @@ func GenerateProgramConfig(program *ProgramConfig) string {
 	if program.LogBackups.IsSet() {
 		ptx.Println("stdout_logfile_backups = " + strconv.Itoa(program.LogBackups.Get()))
 	}
-
-	if ptx.Len() > mark {
-		ptx.Println()
-	}
-	mark = ptx.Len()
-
 	ptx.Println("stderr_logfile  = " + filepath.Join(program.SlogRoot, program.Name+".err"))
 	if program.LogMaxBytes.IsSet() {
 		ptx.Println("stderr_logfile_maxbytes = " + program.LogMaxBytes.Get())
@@ -348,14 +290,8 @@ func GenerateProgramConfig(program *ProgramConfig) string {
 	if program.RedirectStderr.IsSet() {
 		ptx.Println("redirect_stderr = " + strconv.FormatBool(program.RedirectStderr.Get()))
 	}
-
-	if ptx.Len() > mark {
-		ptx.Println()
-	}
-	mark = ptx.Len() //nolint:ineffassign,staticcheck // Keep for future sections
-
-	// Advanced process control - only non-defaults
-	// 高级进程控制 - 只显示非默认值
+	// Advanced process settings - just non-defaults
+	// 高级进程设置 - 只显示非默认值
 	if program.StopAsGroup.IsSet() {
 		ptx.Println("stopasgroup     = " + strconv.FormatBool(program.StopAsGroup.Get()))
 	}
@@ -384,6 +320,11 @@ func GenerateProgramConfig(program *ProgramConfig) string {
 	return ptx.String()
 }
 
+// combineInts converts int slice to comma-separated string
+// Returns blank string if input is blank
+//
+// combineInts 将整数切片转换为逗号分隔的字符串
+// 输入为空时返回空字符串
 func combineInts(items []int, sep string) string {
 	if len(items) == 0 {
 		return ""
@@ -395,6 +336,13 @@ func combineInts(items []int, sep string) string {
 	return strings.Join(results, sep)
 }
 
+// combineSsMap converts string map to name=value pairs joined with sep
+// Used to format environment variables as KEY1=VALUE1,KEY2=VALUE2
+// Returns blank string if input is blank
+//
+// combineSsMap 将字符串映射转换为由分隔符连接的键值对
+// 用于格式化环境变量为 KEY1=VALUE1,KEY2=VALUE2 格式
+// 输入为空时返回空字符串
 func combineSsMap(items map[string]string, sep string) string {
 	if len(items) == 0 {
 		return ""
