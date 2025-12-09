@@ -1,16 +1,16 @@
-package supervisorkratos_test
+package supervisordkratos_test
 
 import (
 	"testing"
 
-	"github.com/orzkratos/supervisorkratos"
+	"github.com/orzkratos/supervisordkratos"
 	"github.com/stretchr/testify/require"
 )
 
 func TestSingleProgramConfig(t *testing.T) {
 	// Test single program config without group
 	// 测试单个程序配置（不含组）
-	cfg := supervisorkratos.NewProgramConfig(
+	cfg := supervisordkratos.NewProgramConfig(
 		"myapp",
 		"/opt/myapp",
 		"deploy",
@@ -22,7 +22,7 @@ func TestSingleProgramConfig(t *testing.T) {
 
 	// Generate config for single program
 	// 生成单个程序配置
-	content := supervisorkratos.GenerateProgramConfig(cfg)
+	content := supervisordkratos.GenerateProgramConfig(cfg)
 
 	t.Log("=== Single Program Configuration ===")
 	t.Log(content)
@@ -43,7 +43,7 @@ stderr_logfile  = /var/log/myapp/myapp.err
 func TestAdvancedProgramConfig(t *testing.T) {
 	// Test advanced program configuration options
 	// 测试高级程序配置选项
-	program := supervisorkratos.NewProgramConfig(
+	program := supervisordkratos.NewProgramConfig(
 		"advanced-service",
 		"/opt/advanced",
 		"performance",
@@ -54,7 +54,7 @@ func TestAdvancedProgramConfig(t *testing.T) {
 		WithKillAsGroup(true).
 		WithExitCodes([]int{0, 1, 2})
 
-	content := supervisorkratos.GenerateProgramConfig(program)
+	content := supervisordkratos.GenerateProgramConfig(program)
 	t.Log("=== Advanced Program Configuration ===")
 	t.Log(content)
 
@@ -77,7 +77,7 @@ exitcodes       = 0,1,2
 func TestWithCustomization(t *testing.T) {
 	// Test customization (from old version git diff)
 	// 测试定制化配置（来自旧版本 git diff）
-	program := supervisorkratos.NewProgramConfig(
+	program := supervisordkratos.NewProgramConfig(
 		"service1",
 		"/opt/service1",
 		"deploy",
@@ -86,7 +86,7 @@ func TestWithCustomization(t *testing.T) {
 		WithLogMaxBytes("100MB").
 		WithRedirectStderr(true)
 
-	content := supervisorkratos.GenerateProgramConfig(program)
+	content := supervisordkratos.GenerateProgramConfig(program)
 	t.Log("=== Required parameters + chain customization ===")
 	t.Log(content)
 
@@ -110,7 +110,7 @@ redirect_stderr = true
 func TestMultiInstanceConfig(t *testing.T) {
 	// Test multi-instance deployment
 	// 测试多实例部署
-	program := supervisorkratos.NewProgramConfig(
+	program := supervisordkratos.NewProgramConfig(
 		"web-server",
 		"/opt/web-server",
 		"deploy",
@@ -121,7 +121,7 @@ func TestMultiInstanceConfig(t *testing.T) {
 			"PORT_BASE": "8080",
 		})
 
-	content := supervisorkratos.GenerateProgramConfig(program)
+	content := supervisordkratos.GenerateProgramConfig(program)
 	t.Log("=== Multi-instance deployment ===")
 	t.Log(content)
 
@@ -142,7 +142,7 @@ process_name    = %(program_name)s_%(process_num)02d
 func TestHighPerformanceConfig(t *testing.T) {
 	// Test high performance settings
 	// 测试高性能设置
-	program := supervisorkratos.NewProgramConfig(
+	program := supervisordkratos.NewProgramConfig(
 		"high-perf",
 		"/opt/high-perf",
 		"performance",
@@ -153,7 +153,7 @@ func TestHighPerformanceConfig(t *testing.T) {
 		WithLogBackups(50).
 		WithPriority(1)
 
-	content := supervisorkratos.GenerateProgramConfig(program)
+	content := supervisordkratos.GenerateProgramConfig(program)
 	t.Log("=== High performance configuration ===")
 	t.Log(content)
 
@@ -178,7 +178,7 @@ priority        = 1
 func TestDevelopmentConfig(t *testing.T) {
 	// Test development environment configuration
 	// 测试开发环境配置
-	program := supervisorkratos.NewProgramConfig(
+	program := supervisordkratos.NewProgramConfig(
 		"dev-service",
 		"/home/dev/service",
 		"developer",
@@ -194,7 +194,7 @@ func TestDevelopmentConfig(t *testing.T) {
 			"NODE_ENV": "development",
 		})
 
-	content := supervisorkratos.GenerateProgramConfig(program)
+	content := supervisordkratos.GenerateProgramConfig(program)
 	t.Log("=== Development environment configuration ===")
 	t.Log(content)
 
@@ -222,7 +222,7 @@ stopasgroup     = false
 func TestCustomExitCodesConfig(t *testing.T) {
 	// Test custom exit codes configuration
 	// 测试自定义退出码配置
-	program := supervisorkratos.NewProgramConfig(
+	program := supervisordkratos.NewProgramConfig(
 		"exit-service",
 		"/opt/exit-service",
 		"exit-user",
@@ -231,7 +231,7 @@ func TestCustomExitCodesConfig(t *testing.T) {
 		WithStopSignal("QUIT").
 		WithKillAsGroup(false)
 
-	content := supervisorkratos.GenerateProgramConfig(program)
+	content := supervisordkratos.GenerateProgramConfig(program)
 	t.Log("=== Custom exit codes configuration ===")
 	t.Log(content)
 
@@ -250,16 +250,16 @@ exitcodes       = 0,1,2,130
 }
 
 func TestDefaultValues(t *testing.T) {
-	// Test minimal configuration with only defaults (from old version)
-	// 测试仅使用默认值的最小配置（来自旧版本）
-	program := supervisorkratos.NewProgramConfig(
+	// Test basic configuration with just defaults (based on old version)
+	// 测试仅使用默认值的基本配置（基于旧版本）
+	program := supervisordkratos.NewProgramConfig(
 		"basic-service",
 		"/opt/basic-service",
 		"deploy",
 		"/var/log/basic",
 	)
 
-	content := supervisorkratos.GenerateProgramConfig(program)
+	content := supervisordkratos.GenerateProgramConfig(program)
 	t.Log("=== Required parameters with defaults ===")
 	t.Log(content)
 
@@ -277,16 +277,16 @@ stderr_logfile  = /var/log/basic/basic-service.err
 }
 
 func TestZeroConfigProgram(t *testing.T) {
-	// Test program with absolutely minimal config using pure defaults
-	// 测试使用纯默认值的最小配置程序
-	program := supervisorkratos.NewProgramConfig(
+	// Test program with zero customization using pure defaults
+	// 测试使用纯默认值的零自定义配置程序
+	program := supervisordkratos.NewProgramConfig(
 		"zero-config",
 		"/opt/zero-config",
 		"deploy",
 		"/var/log/minimal",
 	)
 
-	content := supervisorkratos.GenerateProgramConfig(program)
+	content := supervisordkratos.GenerateProgramConfig(program)
 	t.Log("=== Zero customization program configuration ===")
 	t.Log(content)
 

@@ -1,17 +1,18 @@
-[![GitHub Workflow Status (branch)](https://img.shields.io/github/actions/workflow/status/orzkratos/supervisorkratos/release.yml?branch=main&label=BUILD)](https://github.com/orzkratos/supervisorkratos/actions/workflows/release.yml?query=branch%3Amain)
-[![GoDoc](https://pkg.go.dev/badge/github.com/orzkratos/supervisorkratos)](https://pkg.go.dev/github.com/orzkratos/supervisorkratos)
-[![Coverage Status](https://img.shields.io/coveralls/github/orzkratos/supervisorkratos/main.svg)](https://coveralls.io/github/orzkratos/supervisorkratos?branch=main)
+[![GitHub Workflow Status (branch)](https://img.shields.io/github/actions/workflow/status/orzkratos/supervisordkratos/release.yml?branch=main&label=BUILD)](https://github.com/orzkratos/supervisordkratos/actions/workflows/release.yml?query=branch%3Amain)
+[![GoDoc](https://pkg.go.dev/badge/github.com/orzkratos/supervisordkratos)](https://pkg.go.dev/github.com/orzkratos/supervisordkratos)
+[![Coverage Status](https://img.shields.io/coveralls/github/orzkratos/supervisordkratos/main.svg)](https://coveralls.io/github/orzkratos/supervisordkratos?branch=main)
 [![Supported Go Versions](https://img.shields.io/badge/Go-1.25+-lightgrey.svg)](https://go.dev/)
-[![GitHub Release](https://img.shields.io/github/release/orzkratos/supervisorkratos.svg)](https://github.com/orzkratos/supervisorkratos/releases)
-[![Go Report Card](https://goreportcard.com/badge/github.com/orzkratos/supervisorkratos)](https://goreportcard.com/report/github.com/orzkratos/supervisorkratos)
+[![GitHub Release](https://img.shields.io/github/release/orzkratos/supervisordkratos.svg)](https://github.com/orzkratos/supervisordkratos/releases)
+[![Go Report Card](https://goreportcard.com/badge/github.com/orzkratos/supervisordkratos)](https://goreportcard.com/report/github.com/orzkratos/supervisordkratos)
 
-# supervisorkratos
+# supervisordkratos
 
 Go package to generate supervisord configuration with Kratos microservices integration.
 
 ---
 
 <!-- TEMPLATE (EN) BEGIN: LANGUAGE NAVIGATION -->
+
 ## CHINESE README
 
 [中文说明](README.zh.md)
@@ -28,7 +29,7 @@ Go package to generate supervisord configuration with Kratos microservices integ
 ## Installation
 
 ```bash
-go get github.com/orzkratos/supervisorkratos
+go get github.com/orzkratos/supervisordkratos
 ```
 
 ## Usage
@@ -40,12 +41,12 @@ package main
 
 import (
     "fmt"
-    "github.com/orzkratos/supervisorkratos"
+    "github.com/orzkratos/supervisordkratos"
 )
 
 func main() {
     // Create program config with required parameters
-    program := supervisorkratos.NewProgramConfig(
+    program := supervisordkratos.NewProgramConfig(
         "myapp",           // Program name
         "/opt/myapp",      // Program root DIR
         "deploy",          // User name
@@ -56,7 +57,7 @@ func main() {
       })
 
     // Generate configuration
-    config := supervisorkratos.GenerateProgramConfig(program)
+    config := supervisordkratos.GenerateProgramConfig(program)
     fmt.Println(config)
 }
 ```
@@ -65,27 +66,27 @@ func main() {
 
 ```go
 // Create multiple programs
-apiServer := supervisorkratos.NewProgramConfig(
+apiServer := supervisordkratos.NewProgramConfig(
     "api-server", "/opt/api-server", "deploy", "/var/log/services",
 ).WithStartRetries(3)
 
-worker := supervisorkratos.NewProgramConfig(
+worker := supervisordkratos.NewProgramConfig(
     "worker", "/opt/worker", "deploy", "/var/log/services",
 ).WithAutoStart(false)
 
 // Create group
-group := supervisorkratos.NewGroupConfig("microservices").
+group := supervisordkratos.NewGroupConfig("microservices").
     AddProgram(apiServer).
     AddProgram(worker)
 
-config := supervisorkratos.GenerateGroupConfig(group)
+config := supervisordkratos.GenerateGroupConfig(group)
 ```
 
 ### Advanced Configuration
 
 ```go
 // High-performance service configuration
-program := supervisorkratos.NewProgramConfig(
+program := supervisordkratos.NewProgramConfig(
     "high-perf", "/opt/high-perf", "performance", "/var/log/perf",
 ).WithStartRetries(100).
   WithStopWaitSecs(60).
@@ -98,7 +99,7 @@ program := supervisorkratos.NewProgramConfig(
 
 ```go
 // Multi-instance web server
-program := supervisorkratos.NewProgramConfig(
+program := supervisordkratos.NewProgramConfig(
     "web-server", "/opt/web-server", "deploy", "/var/log/cluster",
 ).WithNumProcs(3).
   WithProcessName("%(program_name)s_%(process_num)02d").
@@ -125,7 +126,7 @@ program := supervisorkratos.NewProgramConfig(
 - `WithStopWaitSecs(int)` - Clean stop timeout seconds
 - `WithStopSignal(string)` - Stop command name (TERM, INT, QUIT)
 - `WithKillAsGroup(bool)` - Terminate child processes as group
-- `WithPriority(int)` - Start rank (small ranks start first)
+- `WithPriority(int)` - Start rank (low ranks start first)
 
 ### Multi-Instance
 - `WithNumProcs(int)` - Count of process instances
@@ -151,20 +152,20 @@ sudo supervisorctl status
 ```
 
 <!-- TEMPLATE (EN) BEGIN: STANDARD PROJECT FOOTER -->
-<!-- VERSION 2025-09-26 07:39:27.188023 +0000 UTC -->
+<!-- VERSION 2025-11-25 03:52:28.131064 +0000 UTC -->
 
 ## 📄 License
 
-MIT License. See [LICENSE](LICENSE).
+MIT License - see [LICENSE](LICENSE).
 
 ---
 
-## 🤝 Contributing
+## 💬 Contact & Feedback
 
 Contributions are welcome! Report bugs, suggest features, and contribute code:
 
-- 🐛 **Found a mistake?** Open an issue on GitHub with reproduction steps
-- 💡 **Have a feature idea?** Create an issue to discuss the suggestion
+- 🐛 **Mistake reports?** Open an issue on GitHub with reproduction steps
+- 💡 **Fresh ideas?** Create an issue to discuss
 - 📖 **Documentation confusing?** Report it so we can improve
 - 🚀 **Need new features?** Share the use cases to help us understand requirements
 - ⚡ **Performance issue?** Help us optimize through reporting slow operations
@@ -185,7 +186,7 @@ New code contributions, follow this process:
 4. **Branch**: Create a feature branch (`git checkout -b feature/xxx`).
 5. **Code**: Implement the changes with comprehensive tests
 6. **Testing**: (Golang project) Ensure tests pass (`go test ./...`) and follow Go code style conventions
-7. **Documentation**: Update documentation to support client-facing changes and use significant commit messages
+7. **Documentation**: Update documentation to support client-facing changes
 8. **Stage**: Stage changes (`git add .`)
 9. **Commit**: Commit changes (`git commit -m "Add feature xxx"`) ensuring backward compatible code
 10. **Push**: Push to the branch (`git push origin feature/xxx`).
@@ -214,4 +215,4 @@ Welcome to contribute to this project via submitting merge requests and reportin
 
 ## GitHub Stars
 
-[![Stargazers](https://starchart.cc/orzkratos/supervisorkratos.svg?variant=adaptive)](https://starchart.cc/orzkratos/supervisorkratos)
+[![Stargazers](https://starchart.cc/orzkratos/supervisordkratos.svg?variant=adaptive)](https://starchart.cc/orzkratos/supervisordkratos)

@@ -1,4 +1,4 @@
-package supervisorkratos
+package supervisordkratos
 
 import (
 	"strings"

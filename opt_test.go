@@ -1,4 +1,4 @@
-package supervisorkratos
+package supervisordkratos
 
 import (
 	"testing"
@@ -19,7 +19,7 @@ func TestOptBasic(t *testing.T) {
 }
 
 func TestOptAny(t *testing.T) {
-	// Test Opt[any] for AutoRestart scenarios
+	// Test Opt[any] with AutoRestart scenarios
 	// 测试 AutoRestart 场景的 Opt[any]
 	opt := NewOpt[any]("unexpected")
 	require.False(t, opt.IsSet())

@@ -1,34 +1,34 @@
-package supervisorkratos_test
+package supervisordkratos_test
 
 import (
 	"testing"
 
-	"github.com/orzkratos/supervisorkratos"
+	"github.com/orzkratos/supervisordkratos"
 	"github.com/stretchr/testify/require"
 )
 
 func TestNewGroupConfig(t *testing.T) {
 	// Test new GroupConfig structure with multiple programs
 	// 测试新的 GroupConfig 结构与多个程序
-	program1 := supervisorkratos.NewProgramConfig(
+	program1 := supervisordkratos.NewProgramConfig(
 		"api-server",
 		"/opt/api-server",
 		"deploy",
 		"/var/log/services",
 	).WithStartRetries(3)
 
-	program2 := supervisorkratos.NewProgramConfig(
+	program2 := supervisordkratos.NewProgramConfig(
 		"worker",
 		"/opt/worker",
 		"deploy",
 		"/var/log/services",
 	).WithAutoStart(false)
 
-	group := supervisorkratos.NewGroupConfig("microservices").
+	group := supervisordkratos.NewGroupConfig("microservices").
 		AddProgram(program1).
 		AddProgram(program2)
 
-	content := supervisorkratos.GenerateGroupConfig(group)
+	content := supervisordkratos.GenerateGroupConfig(group)
 	t.Log("=== New GroupConfig Structure ===")
 	t.Log(content)
 
@@ -59,13 +59,13 @@ stderr_logfile  = /var/log/services/worker.err
 func TestLargeScaleGroupConfig(t *testing.T) {
 	// Test large-scale group configuration
 	// 测试大规模组配置
-	group := supervisorkratos.NewGroupConfig("mega-cluster")
+	group := supervisordkratos.NewGroupConfig("mega-cluster")
 
 	// Create multiple programs with different configurations
 	// 创建多个不同配置的程序
 	for i := 1; i <= 3; i++ {
 		name := "service" + string(rune('0'+i))
-		program := supervisorkratos.NewProgramConfig(
+		program := supervisordkratos.NewProgramConfig(
 			name,
 			"/opt/"+name,
 			"cluster-user",
@@ -80,7 +80,7 @@ func TestLargeScaleGroupConfig(t *testing.T) {
 		group.AddProgram(program)
 	}
 
-	content := supervisorkratos.GenerateGroupConfig(group)
+	content := supervisordkratos.GenerateGroupConfig(group)
 	t.Log("=== Large-scale group configuration ===")
 	t.Log(content)
 
@@ -126,9 +126,9 @@ process_name    = %(program_name)s-%(process_num)02d
 }
 
 func TestMicroserviceGroupConfig(t *testing.T) {
-	// Test microservice cluster with different service types
-	// 测试微服务集群，包含不同类型的服务
-	gateway := supervisorkratos.NewProgramConfig(
+	// Test microservice group with different service types
+	// 测试微服务组，包含不同类型的服务
+	gateway := supervisordkratos.NewProgramConfig(
 		"api-gateway",
 		"/opt/gateway",
 		"deploy",
@@ -140,7 +140,7 @@ func TestMicroserviceGroupConfig(t *testing.T) {
 			"SERVICE_TYPE": "gateway",
 		})
 
-	userService := supervisorkratos.NewProgramConfig(
+	userService := supervisordkratos.NewProgramConfig(
 		"user-service",
 		"/opt/user-service",
 		"deploy",
@@ -148,7 +148,7 @@ func TestMicroserviceGroupConfig(t *testing.T) {
 	).WithStartRetries(5).
 		WithStopWaitSecs(30)
 
-	orderService := supervisorkratos.NewProgramConfig(
+	orderService := supervisordkratos.NewProgramConfig(
 		"order-service",
 		"/opt/order-service",
 		"deploy",
@@ -156,12 +156,12 @@ func TestMicroserviceGroupConfig(t *testing.T) {
 	).WithAutoRestart(false).
 		WithLogMaxBytes("200MB")
 
-	cluster := supervisorkratos.NewGroupConfig("microservice-cluster").
+	cluster := supervisordkratos.NewGroupConfig("microservice-cluster").
 		AddProgram(gateway).
 		AddProgram(userService).
 		AddProgram(orderService)
 
-	content := supervisorkratos.GenerateGroupConfig(cluster)
+	content := supervisordkratos.GenerateGroupConfig(cluster)
 	t.Log("=== Microservice cluster configuration ===")
 	t.Log(content)
 

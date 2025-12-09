@@ -1,17 +1,18 @@
-[![GitHub Workflow Status (branch)](https://img.shields.io/github/actions/workflow/status/orzkratos/supervisorkratos/release.yml?branch=main&label=BUILD)](https://github.com/orzkratos/supervisorkratos/actions/workflows/release.yml?query=branch%3Amain)
-[![GoDoc](https://pkg.go.dev/badge/github.com/orzkratos/supervisorkratos)](https://pkg.go.dev/github.com/orzkratos/supervisorkratos)
-[![Coverage Status](https://img.shields.io/coveralls/github/orzkratos/supervisorkratos/main.svg)](https://coveralls.io/github/orzkratos/supervisorkratos?branch=main)
+[![GitHub Workflow Status (branch)](https://img.shields.io/github/actions/workflow/status/orzkratos/supervisordkratos/release.yml?branch=main&label=BUILD)](https://github.com/orzkratos/supervisordkratos/actions/workflows/release.yml?query=branch%3Amain)
+[![GoDoc](https://pkg.go.dev/badge/github.com/orzkratos/supervisordkratos)](https://pkg.go.dev/github.com/orzkratos/supervisordkratos)
+[![Coverage Status](https://img.shields.io/coveralls/github/orzkratos/supervisordkratos/main.svg)](https://coveralls.io/github/orzkratos/supervisordkratos?branch=main)
 [![Supported Go Versions](https://img.shields.io/badge/Go-1.25+-lightgrey.svg)](https://go.dev/)
-[![GitHub Release](https://img.shields.io/github/release/orzkratos/supervisorkratos.svg)](https://github.com/orzkratos/supervisorkratos/releases)
-[![Go Report Card](https://goreportcard.com/badge/github.com/orzkratos/supervisorkratos)](https://goreportcard.com/report/github.com/orzkratos/supervisorkratos)
+[![GitHub Release](https://img.shields.io/github/release/orzkratos/supervisordkratos.svg)](https://github.com/orzkratos/supervisordkratos/releases)
+[![Go Report Card](https://goreportcard.com/badge/github.com/orzkratos/supervisordkratos)](https://goreportcard.com/report/github.com/orzkratos/supervisordkratos)
 
-# supervisorkratos
+# supervisordkratos
 
 用于为 Kratos 微服务生成 supervisord 配置文件的 Go 包。
 
 ---
 
 <!-- TEMPLATE (ZH) BEGIN: LANGUAGE NAVIGATION -->
+
 ## 英文文档
 
 [ENGLISH README](README.md)
@@ -28,7 +29,7 @@
 ## 安装
 
 ```bash
-go get github.com/orzkratos/supervisorkratos
+go get github.com/orzkratos/supervisordkratos
 ```
 
 ## 使用方法
@@ -40,12 +41,12 @@ package main
 
 import (
     "fmt"
-    "github.com/orzkratos/supervisorkratos"
+    "github.com/orzkratos/supervisordkratos"
 )
 
 func main() {
     // 创建程序配置，提供必需参数
-    program := supervisorkratos.NewProgramConfig(
+    program := supervisordkratos.NewProgramConfig(
         "myapp",           // 程序名称
         "/opt/myapp",      // 程序根目录
         "deploy",          // 运行用户
@@ -56,7 +57,7 @@ func main() {
       })
 
     // 生成配置
-    config := supervisorkratos.GenerateProgramConfig(program)
+    config := supervisordkratos.GenerateProgramConfig(program)
     fmt.Println(config)
 }
 ```
@@ -65,27 +66,27 @@ func main() {
 
 ```go
 // 创建多个程序
-apiServer := supervisorkratos.NewProgramConfig(
+apiServer := supervisordkratos.NewProgramConfig(
     "api-server", "/opt/api-server", "deploy", "/var/log/services",
 ).WithStartRetries(3)
 
-worker := supervisorkratos.NewProgramConfig(
+worker := supervisordkratos.NewProgramConfig(
     "worker", "/opt/worker", "deploy", "/var/log/services",
 ).WithAutoStart(false)
 
 // 创建程序组
-group := supervisorkratos.NewGroupConfig("microservices").
+group := supervisordkratos.NewGroupConfig("microservices").
     AddProgram(apiServer).
     AddProgram(worker)
 
-config := supervisorkratos.GenerateGroupConfig(group)
+config := supervisordkratos.GenerateGroupConfig(group)
 ```
 
 ### 高级配置
 
 ```go
 // 高性能服务配置
-program := supervisorkratos.NewProgramConfig(
+program := supervisordkratos.NewProgramConfig(
     "high-perf", "/opt/high-perf", "performance", "/var/log/perf",
 ).WithStartRetries(100).
   WithStopWaitSecs(60).
@@ -98,7 +99,7 @@ program := supervisorkratos.NewProgramConfig(
 
 ```go
 // 多实例 Web 服务器
-program := supervisorkratos.NewProgramConfig(
+program := supervisordkratos.NewProgramConfig(
     "web-server", "/opt/web-server", "deploy", "/var/log/cluster",
 ).WithNumProcs(3).
   WithProcessName("%(program_name)s_%(process_num)02d").
@@ -151,23 +152,23 @@ sudo supervisorctl status
 ```
 
 <!-- TEMPLATE (ZH) BEGIN: STANDARD PROJECT FOOTER -->
-<!-- VERSION 2025-09-26 07:39:27.188023 +0000 UTC -->
+<!-- VERSION 2025-11-25 03:52:28.131064 +0000 UTC -->
 
 ## 📄 许可证类型
 
-MIT 许可证。详见 [LICENSE](LICENSE)。
+MIT 许可证 - 详见 [LICENSE](LICENSE)。
 
 ---
 
-## 🤝 项目贡献
+## 💬 联系与反馈
 
 非常欢迎贡献代码！报告 BUG、建议功能、贡献代码：
 
-- 🐛 **发现问题？** 在 GitHub 上提交问题并附上重现步骤
-- 💡 **功能建议？** 创建 issue 讨论您的想法
-- 📖 **文档疑惑？** 报告问题，帮助我们改进文档
+- 🐛 **问题报告？** 在 GitHub 上提交问题并附上重现步骤
+- 💡 **新颖思路？** 创建 issue 讨论
+- 📖 **文档疑惑？** 报告问题，帮助我们完善文档
 - 🚀 **需要功能？** 分享使用场景，帮助理解需求
-- ⚡ **性能瓶颈？** 报告慢操作，帮助我们优化性能
+- ⚡ **性能瓶颈？** 报告慢操作，协助解决性能问题
 - 🔧 **配置困扰？** 询问复杂设置的相关问题
 - 📢 **关注进展？** 关注仓库以获取新版本和功能
 - 🌟 **成功案例？** 分享这个包如何改善工作流程
@@ -185,7 +186,7 @@ MIT 许可证。详见 [LICENSE](LICENSE)。
 4. **分支**：创建功能分支（`git checkout -b feature/xxx`）
 5. **编码**：实现您的更改并编写全面的测试
 6. **测试**：（Golang 项目）确保测试通过（`go test ./...`）并遵循 Go 代码风格约定
-7. **文档**：为面向用户的更改更新文档，并使用有意义的提交消息
+7. **文档**：面向用户的更改需要更新文档
 8. **暂存**：暂存更改（`git add .`）
 9. **提交**：提交更改（`git commit -m "Add feature xxx"`）确保向后兼容的代码
 10. **推送**：推送到分支（`git push origin feature/xxx`）
@@ -197,7 +198,7 @@ MIT 许可证。详见 [LICENSE](LICENSE)。
 
 ## 🌟 项目支持
 
-非常欢迎通过提交 Merge Request 和报告问题来为此项目做出贡献。
+非常欢迎通过提交 Merge Request 和报告问题来贡献此项目。
 
 **项目支持：**
 
@@ -214,4 +215,4 @@ MIT 许可证。详见 [LICENSE](LICENSE)。
 
 ## GitHub 标星点赞
 
-[![Stargazers](https://starchart.cc/orzkratos/supervisorkratos.svg?variant=adaptive)](https://starchart.cc/orzkratos/supervisorkratos)
+[![Stargazers](https://starchart.cc/orzkratos/supervisordkratos.svg?variant=adaptive)](https://starchart.cc/orzkratos/supervisordkratos)

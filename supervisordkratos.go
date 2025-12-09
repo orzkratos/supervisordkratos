@@ -1,4 +1,11 @@
-package supervisorkratos
+// Package supervisordkratos: Generate supervisord configuration with Kratos microservices integration
+// Provides fluent API to build supervisord program and group configs with sensible defaults
+// Supports single program, multi-instance deployment, and group management scenarios
+//
+// supervisordkratos: 生成 supervisord 配置，集成 Kratos 微服务
+// 提供流畅的 API 来构建 supervisord 程序和组配置，包含合理的默认值
+// 支持单程序、多实例部署和组管理场景
+package supervisordkratos
 
 import (
 	"path/filepath"
@@ -16,7 +23,7 @@ import (
 type ProgramConfig struct {
 	// Basic program information // 基本程序信息
 	Name     string // Program name // 程序名称
-	UserName string // User to run programs // 运行程序的用户名称
+	UserName string // Account name to run programs // 运行程序的账户名称
 	Root     string // Program root DIR // 程序根目录
 	SlogRoot string // Standard output log root DIR // 标准输出日志根目录
 
@@ -25,9 +32,9 @@ type ProgramConfig struct {
 
 	// Process settings // 进程设置
 	AutoStart    *Opt[bool] // Auto start on supervisord startup // supervisord 启动时自动启动
-	AutoRestart  *Opt[any]  // Auto restart on failure (boolean or string: "false"/"true"/"unexpected") // 失败时自动重启（布尔值或字符串）
-	StartRetries *Opt[int]  // Max start retry times // 最大启动重试次数
-	StartSecs    *Opt[int]  // Seconds to wait before considering start successful // 启动成功前等待秒数
+	AutoRestart  *Opt[any]  // Auto restart on failure (bool/string: "false"/"true"/"unexpected") // 失败时自动重启（布尔值/字符串）
+	StartRetries *Opt[int]  // Max start attempts // 最大启动尝试次数
+	StartSecs    *Opt[int]  // Seconds to wait to confirm start success // 启动成功前等待秒数
 
 	// Log settings // 日志设置
 	LogMaxBytes    *Opt[string] // Max log file size // 最大日志文件大小
@@ -35,15 +42,15 @@ type ProgramConfig struct {
 	RedirectStderr *Opt[bool]   // Redirect stderr to stdout // 重定向 stderr 到 stdout
 
 	// Advanced process settings // 高级进程设置
-	StopAsGroup  *Opt[bool]   // Stop all processes as group // 作为组停止所有进程
-	StopWaitSecs *Opt[int]    // Graceful stop timeout seconds // 优雅停止超时秒数
-	KillAsGroup  *Opt[bool]   // Kill child processes as group // 强制杀死子进程组
-	StopSignal   *Opt[string] // Stop signal name // 停止信号名称
-	Priority     *Opt[int]    // Start priority // 启动优先级
+	StopAsGroup  *Opt[bool]   // Stop processes as group // 作为组停止进程
+	StopWaitSecs *Opt[int]    // Stop timeout seconds // 停止超时秒数
+	KillAsGroup  *Opt[bool]   // Terminate child processes as group // 作为组终止子进程
+	StopSignal   *Opt[string] // Signal to stop process (TERM/INT/QUIT) // 停止进程的信号（TERM/INT/QUIT）
+	Priority     *Opt[int]    // Start rank (low starts first) // 启动顺序（小值先启动）
 	ExitCodes    *Opt[[]int]  // Expected exit codes // 预期退出码
 
 	// Multi-instance settings // 多实例设置
-	NumProcs    *Opt[int]    // Number of process instances // 进程实例数量
+	NumProcs    *Opt[int]    // Process instance count // 进程实例数量
 	ProcessName *Opt[string] // Process name template // 进程名称模板
 }
 
@@ -148,8 +155,8 @@ func (p *ProgramConfig) WithLogBackups(logBackups int) *ProgramConfig {
 	return p
 }
 
-// WithRedirectStderr set redirect stderr flag
-// 设置重定向标准错误标志
+// WithRedirectStderr set stderr redirect flag
+// 设置标准错误重定向标志
 func (p *ProgramConfig) WithRedirectStderr(redirectStderr bool) *ProgramConfig {
 	p.RedirectStderr.Set(redirectStderr)
 	return p
@@ -162,7 +169,7 @@ func (p *ProgramConfig) WithStopAsGroup(stopAsGroup bool) *ProgramConfig {
 	return p
 }
 
-// WithKillAsGroup set kill as group flag
+// WithKillAsGroup set terminate as group flag
 // 设置作为组终止标志
 func (p *ProgramConfig) WithKillAsGroup(killAsGroup bool) *ProgramConfig {
 	p.KillAsGroup.Set(killAsGroup)
@@ -176,15 +183,15 @@ func (p *ProgramConfig) WithStopWaitSecs(stopWaitSecs int) *ProgramConfig {
 	return p
 }
 
-// WithStopSignal set stop signal
-// 设置停止信号
+// WithStopSignal configure the stop signal (TERM/INT/QUIT)
+// 配置停止信号（TERM/INT/QUIT）
 func (p *ProgramConfig) WithStopSignal(stopSignal string) *ProgramConfig {
 	p.StopSignal.Set(stopSignal)
 	return p
 }
 
-// WithPriority set process priority
-// 设置进程优先级
+// WithPriority set process start rank (low starts first)
+// 设置进程启动顺序（小值先启动）
 func (p *ProgramConfig) WithPriority(priority int) *ProgramConfig {
 	p.Priority.Set(priority)
 	return p
@@ -204,8 +211,8 @@ func (p *ProgramConfig) WithExitCodes(exitCodes []int) *ProgramConfig {
 	return p
 }
 
-// WithNumProcs set number of processes
-// 设置进程数量
+// WithNumProcs set process instance count
+// 设置进程实例数量
 func (p *ProgramConfig) WithNumProcs(numProcs int) *ProgramConfig {
 	p.NumProcs.Set(numProcs)
 	return p
@@ -236,8 +243,8 @@ func GenerateProgramConfig(program *ProgramConfig) string {
 
 	ptx := printgo.NewPTX()
 
-	// Generate program header and basic required settings
-	// 生成程序头部和基本必需设置
+	// Generate program section and basic required settings
+	// 生成程序段落和基本必需设置
 	ptx.Println("[program:" + program.Name + "]")
 	ptx.Println("user            = " + program.UserName)
 	ptx.Println("directory       = " + program.Root)
